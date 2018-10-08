@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>RGB Offset effect tester</title>
+    <style>
+        body {
+            max-width: 40em;
+        }
+        img {
+            display: block;
+            max-width: 100%;
+        } 
+        article {
+            padding-top: 5em;
+        }
+    </style>
+</head>
+<body>
+    <h1>RGB Offset effect tester</h1>
+    <p>Tested with Firefox, Google Chrome and iOS Safari.</p>
+    <h2>Original</h2>
+    <img src="rgb.png" alt="">
+
+    <article>
+        <h1>CSS Background blending 01</h1>
+        <code>background-blend-mode: darken;</code>
+        <code>mix-blend-mode: screen;</code>
+        <p>This has accurate colors with iOS Safari and Firefox.</p>
+        <p><strong>Google Chrome</strong> has a noticable bug, the gray balls appears as brownish and white background becomes lightly blue.</p>
+        <div class="cs-bg-lighten">
+            <div class="empty"></div>
+            <div class="r"></div>
+            <div class="g"></div>
+            <div class="b"></div>
+            <style>
+                .cs-bg-lighten {
+                    position: relative;
+                    background: #000;
+                    overflow: hidden;
+                }
+        
+                .cs-bg-lighten .empty {
+                    padding-top: 66.666%; /* Image aspect ratio */
+                    display: block;
+                }
+                .cs-bg-lighten .r,
+                .cs-bg-lighten .g,
+                .cs-bg-lighten .b {
+                    background-image: url(rgb.png);
+                    background-size: cover;
+                    background-blend-mode: darken;
+                    mix-blend-mode: screen;
+                    position: absolute;
+                    top: 0;
+                    right: 0;
+                    bottom: 0;
+                    left: 0;
+                }
+
+                .cs-bg-lighten .r {
+                    background-color: #f00;
+                }
+                .cs-bg-lighten .g {
+                    background-color: #0f0;
+                    transform: translateY(-1.5%);
+                }
+                .cs-bg-lighten .b {
+                    background-color: #00f;
+                    transform: translateY(1.5%);
+                }
+            </style>
+        </div>
+    </article>
+    
+    <article>
+        <h1>CSS Background blending 02</h1>
+        <code>background-blend-mode: darken;</code>
+        <code>mix-blend-mode: lighten;</code>
+        <p>This has accurate colors with iOS Safari, Firefox.</p>
+        <p><strong>Google Chrome</strong> has a slight bug, the white background appears with a hint of blue.</p>
+        <div class="cs-bg-darken">
+            <div class="empty"></div>
+            <div class="r"></div>
+            <div class="g"></div>
+            <div class="b"></div>
+            <style>
+                .cs-bg-darken {
+                    position: relative;
+                    background: #000;
+                    overflow: hidden;
+                }
+        
+                .cs-bg-darken .empty {
+                    padding-top: 66.666%; /* Image aspect ratio */
+                    display: block;
+                }
+                .cs-bg-darken .r,
+                .cs-bg-darken .g,
+                .cs-bg-darken .b {
+                    background-image: url(rgb.png);
+                    background-size: cover;
+                    background-blend-mode: darken;
+                    mix-blend-mode: lighten;
+                    position: absolute;
+                    top: 0;
+                    right: 0;
+                    bottom: 0;
+                    left: 0;
+                }
+
+                .cs-bg-darken .r {
+                    background-color: #f00;
+                }
+                .cs-bg-darken .g {
+                    background-color: #0f0;
+                    transform: translateY(-1.5%);
+                }
+                .cs-bg-darken .b {
+                    background-color: #00f;
+                    transform: translateY(1.5%);
+                }
+            </style>
+        </div>
+    </article>
+    <article>
+        <h1>Canvas reference</h1>
+        <p>This works with all browsers, and is a good reference.</p>
+
+        <canvas class="canvas-rgb" width=1024 height=684></canvas>
+        <style>
+            .canvas-rgb {
+                display: block;
+                width: 100%;
+            }
+        </style>
+        <script>
+            (function() {
+                // Author: Jari Pennanen
+                var ctxOpts = { alpha: false };
+                var img = new Image();
+                var tempCanvas = document.createElement("canvas");
+                var tc = tempCanvas.getContext("2d", ctxOpts);
+                var tempCanvas2 = document.createElement("canvas");
+                var tc2 = document.querySelector(".canvas-rgb").getContext("2d", ctxOpts);
+                var ctxs = [];
+                var rc = document.createElement("canvas"),
+                    gc = document.createElement("canvas"),
+                    bc = document.createElement("canvas"),
+                    rcx = rc.getContext("2d", ctxOpts),
+                    gcx = gc.getContext("2d", ctxOpts),
+                    bcx = bc.getContext("2d", ctxOpts);
+                var imgwidth, imgheight;
+                img.onload = function() {
+                    imgwidth = img.width;
+                    imgheight = img.height;
+                    bc.width = gc.width = rc.width = tempCanvas.width = tempCanvas2.width = imgwidth;
+                    bc.height = gc.height = rc.height = tempCanvas.height = tempCanvas2.height = imgheight;
+                    tc.drawImage(img, 0, 0, img.width, img.height, 0, 0, imgwidth, imgheight);
+                    var data = tc.getImageData(0, 0, imgwidth, imgheight).data;
+                    var r, g, b;
+                    r = tc.createImageData(imgwidth, imgheight);
+                    g = tc.createImageData(imgwidth, imgheight);
+                    b = tc.createImageData(imgwidth, imgheight);
+                    for (var i = 0; i < data.length; i += 4) {
+                        r.data[i + 0] = data[i + 0]; //r
+                        r.data[i + 1] = 0; //g
+                        r.data[i + 2] = 0; //b
+                        r.data[i + 3] = data[i + 3]; //a
+
+                        g.data[i + 0] = 0; //r
+                        g.data[i + 1] = data[i + 1]; //g
+                        g.data[i + 2] = 0; //b
+                        g.data[i + 3] = data[i + 3]; //a
+
+                        b.data[i + 0] = 0; //r
+                        b.data[i + 1] = 0; //g
+                        b.data[i + 2] = data[i + 2]; //b
+                        b.data[i + 3] = data[i + 3]; //a
+                    }
+                    rcx.putImageData(r, 0, 0);
+                    gcx.putImageData(g, 0, 0);
+                    bcx.putImageData(b, 0, 0);
+
+                    tc2.globalCompositeOperation = "source-over";
+                            
+                    var t = 0.015 * imgheight;
+                    tc2.drawImage(rc, 0, 0, imgwidth, imgheight, 0, 0, imgwidth, imgheight);
+                    tc2.globalCompositeOperation = "lighter";
+                    tc2.drawImage(gc, 0, 0, imgwidth, imgheight, 0, -t, imgwidth, imgheight);
+                    tc2.drawImage(bc, 0, 0, imgwidth, imgheight, 0, t, imgwidth, imgheight);
+                    
+                };
+
+                img.src = "./rgb.png";
+            })();
+        </script>
+    </article>
+</body>
+</html>
